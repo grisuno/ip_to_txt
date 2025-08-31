@@ -81,6 +81,13 @@ func setCheckpoint(ipStr string) {
 	}
 }
 
+// wasIPProcessed verifica si una IP ya fue procesada como PTR
+func wasIPProcessed(ipStr string) bool {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM sites WHERE ip = ? AND source = 'ptr'", ipStr).Scan(&count)
+	return err == nil && count > 0
+}
+
 // ipToInt convierte IP string a uint32
 func ipToInt(ipStr string) uint32 {
 	parts := strings.Split(ipStr, ".")
@@ -251,6 +258,25 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
+// union combina dos slices sin duplicados
+func union(a, b []string) []string {
+	set := make(map[string]bool)
+	var result []string
+	for _, s := range a {
+		if !set[s] {
+			set[s] = true
+			result = append(result, s)
+		}
+	}
+	for _, s := range b {
+		if !set[s] {
+			set[s] = true
+			result = append(result, s)
+		}
+	}
+	return result
+}
+
 // saveToDB guarda un registro con source
 func saveToDB(ipStr, domain, title, protocol, source string) {
 	mu.Lock()
@@ -264,9 +290,12 @@ func saveToDB(ipStr, domain, title, protocol, source string) {
 	}
 }
 
-// processPTRIP procesa una IP: PTR → dominio → web → crt.sh → subdominios (propios + raíz)
+// processPTRIP procesa una IP: PTR → dominio → web → crt.sh → subdominios
 func processPTRIP(ipStr string) {
-	defer wg.Done()
+	// Evitar reprocesar IPs ya guardadas como ptr
+	if wasIPProcessed(ipStr) {
+		return
+	}
 
 	fmt.Printf("[→] Probando PTR: %s\n", ipStr)
 
@@ -292,8 +321,8 @@ func processPTRIP(ipStr string) {
 	saveToDB(ipStr, domain, title, protocol, "ptr")
 
 	// === 1. Buscar subdominios del dominio encontrado (ej: %.mail.google.com) ===
-	subdomains1 := runCrtSh(domain)
-	fmt.Printf("[🔍] Encontrados %d subdominios para: %s\n", len(subdomains1), domain)
+	subdomains := runCrtSh(domain)
+	fmt.Printf("[🔍] Encontrados %d subdominios para: %s\n", len(subdomains), domain)
 
 	// === 2. Esperar 1 segundo para ser respetuoso ===
 	time.Sleep(1 * time.Second)
@@ -301,22 +330,21 @@ func processPTRIP(ipStr string) {
 	// === 3. Extraer dominio raíz y buscar todos sus subdominios (ej: %.google.com) ===
 	rootDomain := getRootDomain(domain)
 	if rootDomain == domain {
-		// Si ya es raíz, no repetimos
-		subdomains1 = union(subdomains1, []string{domain})
+		subdomains = union(subdomains, []string{domain})
 	} else {
 		fmt.Printf("[🔍] Buscando subdominios globales para dominio raíz: %s\n", rootDomain)
-		time.Sleep(1 * time.Second) // Otra pausa
+		time.Sleep(1 * time.Second)
 		subdomains2 := runCrtSh(rootDomain)
 		fmt.Printf("[🔍] Encontrados %d subdominios para dominio raíz: %s\n", len(subdomains2), rootDomain)
-		subdomains1 = union(subdomains1, subdomains2)
+		subdomains = union(subdomains, subdomains2)
 	}
 
-	if len(subdomains1) == 0 {
+	if len(subdomains) == 0 {
 		return
 	}
 
-	// Resolver y guardar todos los subdominios únicos
-	for _, sub := range subdomains1 {
+	// Resolver cada subdominio y guardar
+	for _, sub := range subdomains {
 		subIP := resolveDomainToIP(sub)
 		if subIP == "" {
 			continue
@@ -329,51 +357,41 @@ func processPTRIP(ipStr string) {
 	}
 }
 
-// union combina dos slices sin duplicados
-func union(a, b []string) []string {
-	set := make(map[string]bool)
-	var result []string
-	for _, s := range a {
-		if !set[s] {
-			set[s] = true
-			result = append(result, s)
-		}
-	}
-	for _, s := range b {
-		if !set[s] {
-			set[s] = true
-			result = append(result, s)
-		}
-	}
-	return result
-}
-
-// scanIPsWithPTR escanea desde el checkpoint
-func scanIPsWithPTR(startIP, endIP string, limit int) {
-	startInt := ipToInt(startIP)
+// scanIPsWithPTR escanea desde la última IP guardada + 1
+func scanIPsWithPTR(endIP string, limit int) {
 	endInt := ipToInt(endIP)
 	scanCount := uint32(limit)
 
 	if limit == 0 {
-		scanCount = endInt - startInt + 1
+		scanCount = 0xFFFFFFFF // sin límite
 	}
 
-	currentIPStr := getLastCheckpoint()
-	currentInt := ipToInt(currentIPStr)
-	if currentInt < startInt {
-		currentInt = startInt
+	// Obtener última IP procesada
+	lastIPStr := getLastCheckpoint()
+	lastInt := ipToInt(lastIPStr)
+
+	// Empezar desde la siguiente IP
+	startInt := lastInt + 1
+	if startInt == 0 { // Overflow
+		fmt.Println("✅ Alcanzado límite de IPv4 (255.255.255.255)")
+		return
 	}
 
-	fmt.Printf("Iniciando desde IP: %s\n", intToIP(currentInt))
-	fmt.Printf("Rango final: %s → %s\n", startIP, endIP)
+	if startInt > endInt {
+		fmt.Println("✅ Rango completado.")
+		return
+	}
+
+	fmt.Printf("Iniciando desde IP: %s (última fue: %s)\n", intToIP(startInt), lastIPStr)
+	fmt.Printf("Rango final: %s → %s\n", intToIP(startInt), endIP)
 
 	sem := make(chan struct{}, DefaultWorkers)
 	var scanned uint32
 	var muScan sync.Mutex
 
-	for ipInt := currentInt; ipInt <= endInt; ipInt++ {
+	for ipInt := startInt; ipInt <= endInt; ipInt++ {
 		muScan.Lock()
-		if scanned >= scanCount {
+		if scanCount > 0 && scanned >= scanCount {
 			muScan.Unlock()
 			break
 		}
@@ -383,11 +401,10 @@ func scanIPsWithPTR(startIP, endIP string, limit int) {
 
 		wg.Add(1)
 		go func(ip string) {
+			defer wg.Done() // ✅ Solo aquí
 			sem <- struct{}{}
 			processPTRIP(ip)
 			<-sem
-
-			// Solo actualiza checkpoint si fue IP del algoritmo
 			setCheckpoint(ip)
 		}(ipStr)
 
@@ -397,7 +414,9 @@ func scanIPsWithPTR(startIP, endIP string, limit int) {
 	}
 
 	wg.Wait()
-	fmt.Printf("✅ Escaneo completado. Última IP: %s\n", intToIP(currentInt+scanned-1))
+	finalIP := intToIP(startInt + scanned - 1)
+	setCheckpoint(finalIP)
+	fmt.Printf("✅ Escaneo completado. Última IP procesada: %s\n", finalIP)
 }
 
 func main() {
@@ -424,5 +443,5 @@ func main() {
 	httpClient = &http.Client{Timeout: Timeout}
 
 	fmt.Println("[*] Iniciando escaneo con checkpoint...")
-	scanIPsWithPTR("1.1.1.1", "255.255.255.255", limit)
+	scanIPsWithPTR("255.255.255.255", limit)
 }
