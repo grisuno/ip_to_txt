@@ -1,0 +1,83 @@
+{
+  "concepts": [
+    {
+      "name": "int",
+      "files": [
+        "app.py",
+        "ip_to_db.py",
+        "main.go"
+      ],
+      "mentions": 8,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "ips",
+      "files": [
+        "app.py",
+        "ip_to_db.py",
+        "main.go"
+      ],
+      "mentions": 4,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "private",
+      "files": [
+        "app.py",
+        "ip_to_db.py",
+        "main.go"
+      ],
+      "mentions": 4,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "domain",
+      "files": [
+        "ip_to_db.py",
+        "main.go"
+      ],
+      "mentions": 5,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "process",
+      "files": [
+        "ip_to_db.py",
+        "main.go"
+      ],
+      "mentions": 3,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "save",
+      "files": [
+        "ip_to_db.py",
+        "main.go"
+      ],
+      "mentions": 3,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "generate",
+      "files": [
+        "app.py",
+        "ip_to_db.py"
+      ],
+      "mentions": 2,
+      "confidence": "EXTRACTED"
+    }
+  ],
+  "relations": [],
+  "dialectic": [
+    "Thesis: `domain` centralizes 2 files; Antithesis: `int` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `domain` centralizes 2 files; Antithesis: `ips` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `domain` centralizes 2 files; Antithesis: `private` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `domain` centralizes 2 files; Antithesis: `process` pulls 2 files with 2 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `domain` centralizes 2 files; Antithesis: `save` pulls 2 files with 2 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `generate` centralizes 2 files; Antithesis: `int` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `generate` centralizes 2 files; Antithesis: `ips` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `generate` centralizes 2 files; Antithesis: `private` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `int` centralizes 3 files; Antithesis: `ips` pulls 3 files with 3 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `int` centralizes 3 files; Antithesis: `private` pulls 3 files with 3 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?"
+  ]
+}
