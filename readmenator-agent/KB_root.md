@@ -24,7 +24,6 @@
   - `main` (function, line 79) `def main()`
 
 ## main.go
-- Doc: initDB: initDB inicializa la base de datos
 - Layer: utility
 - Language: go
 - Symbols:

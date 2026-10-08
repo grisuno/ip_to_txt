@@ -11,7 +11,7 @@
 
 **Total Files Parsed:** 3 | **Total Symbols Extracted:** 32 | **Total Imports:** 19
 
-<!-- ranking_model: v1.0 | weights: {ppr:0.45,auth:0.2,test:0.15,doc:0.1,fresh:0.1} | alpha:0.85 | commit:1e0fd0b | date:2026-07-18 -->
+<!-- ranking_model: v1.0 | weights: {ppr:0.45,auth:0.2,test:0.15,doc:0.1,fresh:0.1} | alpha:0.85 | commit:05a4468 | date:2026-07-18 -->
 
 
 ## Table of Contents
@@ -25,13 +25,12 @@
 7. [Hotspot Analysis](#hotspot-analysis)
 8. [Change Impact Analysis](#change-impact-analysis)
 9. [Suggested Linting Rules](#suggested-linting-rules)
-10. [Concept Graph](#concept-graph)
-11. [Orphans](#orphans)
-12. [Query Recipes](#query-recipes)
-13. [Structural Knowledge Map](#structural-knowledge-map)
-14. [UML Class Diagram](#uml-class-diagram)
-15. [Code Property Graph](#code-property-graph)
-16. [Architecture Reference](#architecture-reference)
+10. [Orphans](#orphans)
+11. [Query Recipes](#query-recipes)
+12. [Structural Knowledge Map](#structural-knowledge-map)
+13. [UML Class Diagram](#uml-class-diagram)
+14. [Code Property Graph](#code-property-graph)
+15. [Architecture Reference](#architecture-reference)
     - [GO (1 files)](#go-1-files)
     - [PY (2 files)](#py-2-files)
 
@@ -133,37 +132,6 @@ Files ranked by combined complexity (symbol count) and centrality (connection co
 | `main.go` | 1.000 | 1.000 | 1.000 | 19 | 13 |
 | `app.py` | 0.263 | 0.077 | 0.151 | 5 | 1 |
 | `ip_to_db.py` | 0.421 | 0.385 | 0.399 | 8 | 5 |
-
----
-
-## Concept Graph
-
-Semantic second-brain layer: nouns are concept nodes, verbs are edges. Each noun maps atomically to a file set (EXTRACTED); each verb aggregates structural imports, calls, and inherits into consumes, invokes, extends, depends_on, or bridges (INFERRED).
-
-**7 concepts, 0 relations.**
-
-| Concept | Files | Mentions |
-|---------|-------|----------|
-| `int` | 3 | 8 |
-| `ips` | 3 | 4 |
-| `private` | 3 | 4 |
-| `domain` | 2 | 5 |
-| `process` | 2 | 3 |
-| `save` | 2 | 3 |
-| `generate` | 2 | 2 |
-
-### Dialectic Prompts
-
-- Thesis: `domain` centralizes 2 files; Antithesis: `int` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `domain` centralizes 2 files; Antithesis: `ips` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `domain` centralizes 2 files; Antithesis: `private` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `domain` centralizes 2 files; Antithesis: `process` pulls 2 files with 2 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `domain` centralizes 2 files; Antithesis: `save` pulls 2 files with 2 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `generate` centralizes 2 files; Antithesis: `int` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `generate` centralizes 2 files; Antithesis: `ips` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `generate` centralizes 2 files; Antithesis: `private` pulls 3 files with 2 shared (Jaccard 0.67); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `int` centralizes 3 files; Antithesis: `ips` pulls 3 files with 3 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `int` centralizes 3 files; Antithesis: `private` pulls 3 files with 3 shared (Jaccard 1.00); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
 
 ---
 

@@ -1,7 +1,7 @@
 # Index
 
-| File | Purpose | Subsystem | Symbols | Used by |
-|------|---------|-----------|---------|---------|
-| `app.py` | - | root | 5 | 0 |
-| `ip_to_db.py` | - | root | 8 | 0 |
-| `main.go` | initDB: initDB inicializa la base de datos | root | 19 | 0 |
+| File | Purpose | Subsystem | Symbols |
+|------|---------|-----------|---------|
+| `app.py` | - | root | 5 |
+| `ip_to_db.py` | - | root | 8 |
+| `main.go` | - | root | 19 |
